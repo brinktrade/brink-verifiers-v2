@@ -1,6 +1,6 @@
 ## `ApprovalSwapsV1`
 
-These functions should be executed by metaPartialSignedDelegateCall() on Brink account proxy contracts
+These functions should be executed by metaDelegateCall() on Brink account proxy contracts
 
 
 

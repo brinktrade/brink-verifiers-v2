@@ -11,7 +11,7 @@ import "@brinkninja/verifiers/contracts/Libraries/NativeOrERC20.sol";
 import "../ReentrancyGuard.sol";
 
 /// @title Verifier functions for swaps that use token approvals for input asset transfer
-/// @notice These functions should be executed by metaPartialSignedDelegateCall() on Brink account proxy contracts
+/// @notice These functions should be executed by metaDelegateCall() on Brink account proxy contracts
 contract ApprovalSwapsV1 is ReentrancyGuard {
   /// @dev Revert when swap is expired
   error Expired();
