@@ -25,6 +25,24 @@ contract TestFulfillSwap is ERC1155Holder {
     }
   }
 
+  function fulfillNftOutSwapAndCall(IERC721 nftOut, uint nftID, address account, address to, bytes memory data) external payable {
+    if (nftID > 0) {
+      nftOut.transferFrom(address(this), account, nftID);
+    }
+
+    assembly {
+      let result := call(gas(), to, 0, add(data, 0x20), mload(data), 0, 0)
+      returndatacopy(0, 0, returndatasize())
+      switch result
+      case 0 {
+        revert(0, returndatasize())
+      }
+      default {
+        return(0, returndatasize())
+      }
+    }
+  }
+
   function fulfillERC1155OutSwap(IERC1155 erc1155Out, uint id, uint amount, address account) external payable {
     erc1155Out.safeTransferFrom(address(this), account, id, amount, '');
   }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts v4.4.1 (security/ReentrancyGuard.sol)
-// Modified for unstructured storage
+// Modified to use unstructured storage
 
 pragma solidity ^0.8.0;
 
@@ -35,7 +35,7 @@ abstract contract ReentrancyGuard {
     uint256 private constant _NOT_ENTERED = 1;
     uint256 private constant _ENTERED = 2;
 
-    // This is the uint256 representation of keccak("reentrancy_guard_status")
+    // uint256 representation of keccak("reentrancy_guard_status")
     uint256 private constant _STATUS_PTR = 111692000423667832297373040361148959237193225730820145803586364568851768547719;
 
     /**
@@ -67,14 +67,6 @@ abstract contract ReentrancyGuard {
 
     function _setStatus(uint256 status) private {
         assembly { sstore(_STATUS_PTR, status) }
-    }
-
-    /**
-     * @dev Returns true if the reentrancy guard is currently set to "entered", which indicates there is a
-     * `nonReentrant` function in the call stack.
-     */
-    function _reentrancyGuardEntered() internal view returns (bool) {
-        return _status() == _ENTERED;
     }
 
     function _status() internal view returns (uint256 status) {
