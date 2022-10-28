@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@brinkninja/verifiers/contracts/Interfaces/ICallExecutor.sol";
 import "@brinkninja/verifiers/contracts/Libraries/Bit.sol";
-import "@brinkninja/verifiers/contracts/Libraries/NativeOrERC20.sol";
 import "../ReentrancyGuard.sol";
 
 /// @title Verifier functions for swaps that use token approvals for input asset transfer
