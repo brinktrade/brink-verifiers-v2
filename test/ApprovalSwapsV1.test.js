@@ -94,7 +94,6 @@ const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 describe('ApprovalSwapsV1', function() {
   beforeEach(async function () {
     const TestFulfillSwap = await ethers.getContractFactory('TestFulfillSwap')
-    const CallExecutor = await ethers.getContractFactory('CallExecutor')
     const ApprovalSwapsV1 = await ethers.getContractFactory('ApprovalSwapsV1')
     const TestERC20 = await ethers.getContractFactory('TestERC20')
     const TestERC721 = await ethers.getContractFactory('TestERC721')
@@ -105,7 +104,7 @@ describe('ApprovalSwapsV1', function() {
     const bamfs = await TestERC721.deploy('bamfs', 'BAMFS')
     const erc1155 = await TestERC1155.deploy()
     const { proxyAccount, proxyOwner } = await setupProxyAccount()
-    await CallExecutor.deploy()
+
     this.testFulfillSwap = await TestFulfillSwap.deploy()
     this.approvalSwapsV1 = await ApprovalSwapsV1.deploy()
     this.proxyAccount = proxyAccount
@@ -620,7 +619,7 @@ describe('ApprovalSwapsV1', function() {
 
     it('when account has insufficient NFT allowance', async function () {
       await this.cryptoSkunks.mint(this.proxyOwner.address, this.cryptoSkunkID)
-      await expect(this.metaDelegateCall(this.insufficientBalanceCall)).to.be.revertedWith('ERC721: transfer caller is not owner nor approved')
+      await expect(this.metaDelegateCall(this.insufficientBalanceCall)).to.be.revertedWith('ERC721: caller is not token owner nor approved')
     })
 
     it('when swap is expired, should revert with Expired()', async function () {
@@ -917,7 +916,7 @@ describe('ApprovalSwapsV1', function() {
 
     it('when account has insufficient ERC1155 allowance', async function () {
       await this.erc1155.mint(this.proxyOwner.address, this.erc1155_SILVER, this.erc1155SwapAmount, '0x')
-      await expect(this.metaDelegateCall(this.successCall(this.proxyOwner))).to.be.revertedWith('ERC1155: caller is not owner nor approved')
+      await expect(this.metaDelegateCall(this.successCall(this.proxyOwner))).to.be.revertedWith('ERC1155: caller is not token owner nor approved')
     })
 
     it('when swap is expired, should revert with Expired()', async function () {
@@ -1024,7 +1023,7 @@ describe('ApprovalSwapsV1', function() {
 
     it('when account has insufficient ERC1155 allowance', async function () {
       await this.erc1155.mint(this.proxyOwner.address, this.erc1155_SILVER, this.erc1155SilverSwapAmount, '0x')
-      await expect(this.metaDelegateCall(this.successCall(this.proxyOwner))).to.be.revertedWith('ERC1155: caller is not owner nor approved')
+      await expect(this.metaDelegateCall(this.successCall(this.proxyOwner))).to.be.revertedWith('ERC1155: caller is not token owner nor approved')
     })
 
     it('when swap is expired, should revert with Expired()', async function () {
