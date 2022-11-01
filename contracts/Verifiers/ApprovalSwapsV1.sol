@@ -86,7 +86,9 @@ contract ApprovalSwapsV1 {
     CALL_EXECUTOR_V2.proxyCall(to, data);
 
     uint256 nftOutAmountReceived = nftOut.balanceOf(owner) - nftOutBalance;
-    require(nftOutAmountReceived >= 1, 'NotEnoughReceived');
+    if (nftOutAmountReceived < 1) {
+      revert NotEnoughReceived(nftOutAmountReceived);
+    }
   }
 
   /// @dev Verifies swap from a single ERC721 ID to fungible token (ERC20 or Native)
@@ -119,7 +121,9 @@ contract ApprovalSwapsV1 {
     CALL_EXECUTOR_V2.proxyCall(to, data);
 
     uint256 tokenOutAmountReceived = balanceOf(tokenOut, owner) - tokenOutBalance;
-    require(tokenOutAmountReceived >= tokenOutAmount, 'NotEnoughReceived');
+    if(tokenOutAmountReceived < tokenOutAmount) {
+      revert NotEnoughReceived(tokenOutAmountReceived);
+    }
   }
 
   /// @dev Verifies swap from an ERC20 token to an ERC1155 token
@@ -153,7 +157,9 @@ contract ApprovalSwapsV1 {
     CALL_EXECUTOR_V2.proxyCall(to, data);
 
     uint256 tokenOutAmountReceived = tokenOut.balanceOf(owner, tokenOutId) - tokenOutBalance;
-    require(tokenOutAmountReceived >= tokenOutAmount, 'NotEnoughReceived');
+    if(tokenOutAmountReceived < tokenOutAmount) {
+      revert NotEnoughReceived(tokenOutAmountReceived);
+    }
   }
 
   /// @dev Verifies swap from an ERC1155 token to fungible token (ERC20 or Native)
@@ -187,7 +193,9 @@ contract ApprovalSwapsV1 {
     CALL_EXECUTOR_V2.proxyCall(to, data);
 
     uint256 tokenOutAmountReceived = balanceOf(tokenOut, owner) - tokenOutBalance;
-    require(tokenOutAmountReceived >= tokenOutAmount, 'NotEnoughReceived');
+    if(tokenOutAmountReceived < tokenOutAmount) {
+      revert NotEnoughReceived(tokenOutAmountReceived);
+    }
   }
 
   /// @dev Verifies swap from an ERC1155 token to another ERC1155 token
@@ -222,7 +230,9 @@ contract ApprovalSwapsV1 {
     CALL_EXECUTOR_V2.proxyCall(to, data);
 
     uint256 tokenOutAmountReceived = tokenOut.balanceOf(owner, tokenOutId) - tokenOutBalance;
-    require(tokenOutAmountReceived >= tokenOutAmount, 'NotEnoughReceived');
+    if(tokenOutAmountReceived < tokenOutAmount) {
+      revert NotEnoughReceived(tokenOutAmountReceived);
+    }
   }
 
   /// @dev Returns the owner balance of token, taking into account whether token is a native ETH representation or an ERC20
