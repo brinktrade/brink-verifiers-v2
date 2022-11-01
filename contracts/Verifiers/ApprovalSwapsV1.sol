@@ -5,8 +5,8 @@ pragma abicoder v1;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "@brinkninja/verifiers/contracts/Interfaces/ICallExecutor.sol";
 import "@brinkninja/verifiers/contracts/Libraries/Bit.sol";
-import "../Interfaces/ICallExecutorV2.sol";
 
 /// @title Verifier functions for swaps that use token approvals for input asset transfer
 /// @notice These functions should be executed by metaDelegateCall() on Brink account proxy contracts
@@ -17,7 +17,7 @@ contract ApprovalSwapsV1 {
   /// @dev Revert when swap has not received enough of the output asset to be fulfilled
   error NotEnoughReceived(uint256 amountReceived);
 
-  ICallExecutorV2 constant CALL_EXECUTOR_V2 = ICallExecutorV2(0x6FE756B9C61CF7e9f11D96740B096e51B64eBf13);
+  ICallExecutor constant CALL_EXECUTOR_V2 = ICallExecutor(0x6FE756B9C61CF7e9f11D96740B096e51B64eBf13);
 
   /// @dev Executes an ERC20 to token (ERC20 or Native ETH) limit swap
   /// @notice This should be executed by metaDelegateCall() or metaDelegateCall_EIP1271() with the following signed and unsigned params
@@ -86,7 +86,9 @@ contract ApprovalSwapsV1 {
     CALL_EXECUTOR_V2.proxyCall(to, data);
 
     uint256 nftOutAmountReceived = nftOut.balanceOf(owner) - nftOutBalance;
-    require(nftOutAmountReceived >= 1, 'NotEnoughReceived');
+    if (nftOutAmountReceived < 1) {
+      revert NotEnoughReceived(nftOutAmountReceived);
+    }
   }
 
   /// @dev Verifies swap from a single ERC721 ID to fungible token (ERC20 or Native)
@@ -119,7 +121,9 @@ contract ApprovalSwapsV1 {
     CALL_EXECUTOR_V2.proxyCall(to, data);
 
     uint256 tokenOutAmountReceived = balanceOf(tokenOut, owner) - tokenOutBalance;
-    require(tokenOutAmountReceived >= tokenOutAmount, 'NotEnoughReceived');
+    if(tokenOutAmountReceived < tokenOutAmount) {
+      revert NotEnoughReceived(tokenOutAmountReceived);
+    }
   }
 
   /// @dev Verifies swap from an ERC20 token to an ERC1155 token
@@ -153,7 +157,9 @@ contract ApprovalSwapsV1 {
     CALL_EXECUTOR_V2.proxyCall(to, data);
 
     uint256 tokenOutAmountReceived = tokenOut.balanceOf(owner, tokenOutId) - tokenOutBalance;
-    require(tokenOutAmountReceived >= tokenOutAmount, 'NotEnoughReceived');
+    if(tokenOutAmountReceived < tokenOutAmount) {
+      revert NotEnoughReceived(tokenOutAmountReceived);
+    }
   }
 
   /// @dev Verifies swap from an ERC1155 token to fungible token (ERC20 or Native)
@@ -187,7 +193,9 @@ contract ApprovalSwapsV1 {
     CALL_EXECUTOR_V2.proxyCall(to, data);
 
     uint256 tokenOutAmountReceived = balanceOf(tokenOut, owner) - tokenOutBalance;
-    require(tokenOutAmountReceived >= tokenOutAmount, 'NotEnoughReceived');
+    if(tokenOutAmountReceived < tokenOutAmount) {
+      revert NotEnoughReceived(tokenOutAmountReceived);
+    }
   }
 
   /// @dev Verifies swap from an ERC1155 token to another ERC1155 token
@@ -222,7 +230,9 @@ contract ApprovalSwapsV1 {
     CALL_EXECUTOR_V2.proxyCall(to, data);
 
     uint256 tokenOutAmountReceived = tokenOut.balanceOf(owner, tokenOutId) - tokenOutBalance;
-    require(tokenOutAmountReceived >= tokenOutAmount, 'NotEnoughReceived');
+    if(tokenOutAmountReceived < tokenOutAmount) {
+      revert NotEnoughReceived(tokenOutAmountReceived);
+    }
   }
 
   /// @dev Returns the owner balance of token, taking into account whether token is a native ETH representation or an ERC20

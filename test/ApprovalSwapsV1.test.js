@@ -434,7 +434,7 @@ describe('ApprovalSwapsV1', function() {
     it('when required NFT is not received by the account', async function () {
       await this.tokenA.mint(this.proxyOwner.address, this.tokenASwapAmount)
       await this.tokenA.connect(this.proxyOwner).approve(this.proxyAccount.address, this.tokenASwapAmount)
-      await expect(this.metaDelegateCall(this.nftNotReceivedCall)).to.be.revertedWith('NotEnoughReceived')
+      await expect(this.metaDelegateCall(this.nftNotReceivedCall)).to.be.revertedWith('NotEnoughReceived(0)')
     })
 
     it('when swap is expired, should revert with Expired()', async function () {
@@ -532,7 +532,7 @@ describe('ApprovalSwapsV1', function() {
         ]
       ), numSignedParams)
 
-      this.ethNotReceivedCall = splitCallData(encodeFunctionCall(
+      this.ethNotReceivedCall = tokenRecipient => splitCallData(encodeFunctionCall(
         'nftToToken',
         NFT_TO_TOKEN_PARAM_TYPES.map(t => t.type),
         [
@@ -540,7 +540,11 @@ describe('ApprovalSwapsV1', function() {
           this.expiryBlock.toString(),
           this.recipient.address,
           this.testFulfillSwap.address,
-          encodeFunctionCall('fulfillNothing', [], [])
+          encodeFunctionCall(
+            'fulfillEthOutSwap',
+            ['uint', 'address'],
+            [ this.tokenASwapAmount.sub(1).toString(), tokenRecipient.address ]
+          )
         ]
       ), numSignedParams)
 
@@ -608,13 +612,13 @@ describe('ApprovalSwapsV1', function() {
     it('when required token is not received by the account', async function () {
       await this.cryptoSkunks.mint(this.proxyOwner.address, this.cryptoSkunkID)
       await this.cryptoSkunks.connect(this.proxyOwner).approve(this.proxyAccount.address, this.cryptoSkunkID)
-      await expect(this.metaDelegateCall(this.tokenNotReceivedCall)).to.be.revertedWith('NotEnoughReceived')
+      await expect(this.metaDelegateCall(this.tokenNotReceivedCall)).to.be.revertedWith('NotEnoughReceived(0)')
     })
 
     it('when required ETH is not received by the account', async function () {
       await this.cryptoSkunks.mint(this.proxyOwner.address, this.cryptoSkunkID)
       await this.cryptoSkunks.connect(this.proxyOwner).approve(this.proxyAccount.address, this.cryptoSkunkID)
-      await expect(this.metaDelegateCall(this.ethNotReceivedCall)).to.be.revertedWith('NotEnoughReceived')
+      await expect(this.metaDelegateCall(this.ethNotReceivedCall(this.proxyOwner))).to.be.revertedWith(`NotEnoughReceived(${this.tokenASwapAmount.sub(1).toString()})`)
     })
 
     it('when account has insufficient NFT allowance', async function () {
@@ -678,7 +682,7 @@ describe('ApprovalSwapsV1', function() {
         ]
       ), numSignedParams)
 
-      this.notReceivedCall = splitCallData(encodeFunctionCall(
+      this.notReceivedCall = erc1155Recipient => splitCallData(encodeFunctionCall(
         'tokenToERC1155',
         TOKEN_TO_ERC1155_PARAM_TYPES.map(t => t.type),
         [
@@ -686,7 +690,11 @@ describe('ApprovalSwapsV1', function() {
           this.expiryBlock.toString(),
           this.recipient.address,
           this.testFulfillSwap.address,
-          encodeFunctionCall('fulfillNothing', [], [])
+          encodeFunctionCall(
+            'fulfillERC1155OutSwap',
+            ['address', 'uint', 'uint', 'address'],
+            [ this.erc1155.address, this.erc1155_SILVER, this.erc1155SwapAmount.sub(1), erc1155Recipient.address ]
+          )
         ]
       ), numSignedParams)
 
@@ -751,7 +759,7 @@ describe('ApprovalSwapsV1', function() {
     it('when required ERC1155 is not received by the account', async function () {
       await this.tokenA.mint(this.proxyOwner.address, this.tokenASwapAmount)
       await this.tokenA.connect(this.proxyOwner).approve(this.proxyAccount.address, this.tokenASwapAmount)
-      await expect(this.metaDelegateCall(this.notReceivedCall)).to.be.revertedWith('NotEnoughReceived')
+      await expect(this.metaDelegateCall(this.notReceivedCall(this.proxyOwner))).to.be.revertedWith(`NotEnoughReceived(${this.erc1155SwapAmount.sub(1).toString()})`)
     })
 
     it('when swap is expired, should revert with Expired()', async function () {
@@ -839,7 +847,7 @@ describe('ApprovalSwapsV1', function() {
         ]
       ), numSignedParams)
 
-      this.tokenNotReceivedCall = splitCallData(encodeFunctionCall(
+      this.tokenNotReceivedCall = tokenRecipient => splitCallData(encodeFunctionCall(
         'ERC1155ToToken',
         ERC1155_TO_TOKEN_PARAM_TYPES.map(t => t.type),
         [
@@ -847,11 +855,15 @@ describe('ApprovalSwapsV1', function() {
           this.expiryBlock.toString(),
           this.recipient.address,
           this.testFulfillSwap.address,
-          encodeFunctionCall('fulfillNothing', [], [])
+          encodeFunctionCall(
+            'fulfillTokenOutSwap',
+            ['address', 'uint', 'address'],
+            [ this.tokenA.address, this.tokenASwapAmount.sub(1).toString(), tokenRecipient.address ]
+          )
         ]
       ), numSignedParams)
 
-      this.ethNotReceivedCall = splitCallData(encodeFunctionCall(
+      this.ethNotReceivedCall = tokenRecipient => splitCallData(encodeFunctionCall(
         'ERC1155ToToken',
         ERC1155_TO_TOKEN_PARAM_TYPES.map(t => t.type),
         [
@@ -859,7 +871,11 @@ describe('ApprovalSwapsV1', function() {
           this.expiryBlock.toString(),
           this.recipient.address,
           this.testFulfillSwap.address,
-          encodeFunctionCall('fulfillNothing', [], [])
+          encodeFunctionCall(
+            'fulfillEthOutSwap',
+            ['uint', 'address'],
+            [ this.tokenASwapAmount.sub(1).toString(), tokenRecipient.address ]
+          )
         ]
       ), numSignedParams)
 
@@ -905,13 +921,13 @@ describe('ApprovalSwapsV1', function() {
     it('when required token is not received by the account', async function () {
       await this.erc1155.mint(this.proxyOwner.address, this.erc1155_SILVER, this.erc1155SwapAmount, '0x')
       await this.erc1155.connect(this.proxyOwner).setApprovalForAll(this.proxyAccount.address, true)
-      await expect(this.metaDelegateCall(this.tokenNotReceivedCall)).to.be.revertedWith('NotEnoughReceived')
+      await expect(this.metaDelegateCall(this.tokenNotReceivedCall(this.proxyOwner))).to.be.revertedWith(`NotEnoughReceived(${this.tokenASwapAmount.sub(1).toString()})`)
     })
 
     it('when required ETH is not received by the account', async function () {
       await this.erc1155.mint(this.proxyOwner.address, this.erc1155_SILVER, this.erc1155SwapAmount, '0x')
       await this.erc1155.connect(this.proxyOwner).setApprovalForAll(this.proxyAccount.address, true)
-      await expect(this.metaDelegateCall(this.ethNotReceivedCall)).to.be.revertedWith('NotEnoughReceived')
+      await expect(this.metaDelegateCall(this.ethNotReceivedCall(this.proxyOwner))).to.be.revertedWith(`NotEnoughReceived(${this.tokenASwapAmount.sub(1).toString()})`)
     })
 
     it('when account has insufficient ERC1155 allowance', async function () {
@@ -976,7 +992,7 @@ describe('ApprovalSwapsV1', function() {
         ]
       ), numSignedParams)
 
-      this.tokenNotReceivedCall = splitCallData(encodeFunctionCall(
+      this.tokenNotReceivedCall = erc1155Recipient => splitCallData(encodeFunctionCall(
         'ERC1155ToERC1155',
         ERC1155_TO_ERC1155_PARAM_TYPES.map(t => t.type),
         [
@@ -984,7 +1000,11 @@ describe('ApprovalSwapsV1', function() {
           this.expiryBlock.toString(),
           this.recipient.address,
           this.testFulfillSwap.address,
-          encodeFunctionCall('fulfillNothing', [], [])
+          encodeFunctionCall(
+            'fulfillERC1155OutSwap',
+            ['address', 'uint', 'uint', 'address'],
+            [ this.erc1155.address, this.erc1155_BRONZE, this.erc1155BronzeSwapAmount.sub(1), erc1155Recipient.address ]
+          )
         ]
       ), numSignedParams)
 
@@ -1018,7 +1038,7 @@ describe('ApprovalSwapsV1', function() {
     it('when required token is not received by the account', async function () {
       await this.erc1155.mint(this.proxyOwner.address, this.erc1155_SILVER, this.erc1155SilverSwapAmount, '0x')
       await this.erc1155.connect(this.proxyOwner).setApprovalForAll(this.proxyAccount.address, true)
-      await expect(this.metaDelegateCall(this.tokenNotReceivedCall)).to.be.revertedWith('NotEnoughReceived')
+      await expect(this.metaDelegateCall(this.tokenNotReceivedCall(this.proxyOwner))).to.be.revertedWith(`NotEnoughReceived(${this.erc1155BronzeSwapAmount.sub(1).toString()})`)
     })
 
     it('when account has insufficient ERC1155 allowance', async function () {
