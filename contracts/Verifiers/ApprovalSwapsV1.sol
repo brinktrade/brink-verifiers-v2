@@ -5,20 +5,19 @@ pragma abicoder v1;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import "@brinkninja/verifiers/contracts/Interfaces/ICallExecutor.sol";
 import "@brinkninja/verifiers/contracts/Libraries/Bit.sol";
-import "../ReentrancyGuard.sol";
+import "../Interfaces/ICallExecutorV2.sol";
 
 /// @title Verifier functions for swaps that use token approvals for input asset transfer
 /// @notice These functions should be executed by metaDelegateCall() on Brink account proxy contracts
-contract ApprovalSwapsV1 is ReentrancyGuard {
+contract ApprovalSwapsV1 {
   /// @dev Revert when swap is expired
   error Expired();
 
   /// @dev Revert when swap has not received enough of the output asset to be fulfilled
   error NotEnoughReceived(uint256 amountReceived);
 
-  ICallExecutor constant CALL_EXECUTOR = ICallExecutor(0xDE61dfE5fbF3F4Df70B16D0618f69B96A2754bf8);
+  ICallExecutorV2 constant CALL_EXECUTOR_V2 = ICallExecutorV2(0x6FE756B9C61CF7e9f11D96740B096e51B64eBf13);
 
   /// @dev Executes an ERC20 to token (ERC20 or Native ETH) limit swap
   /// @notice This should be executed by metaDelegateCall() or metaDelegateCall_EIP1271() with the following signed and unsigned params
@@ -36,7 +35,7 @@ contract ApprovalSwapsV1 is ReentrancyGuard {
     uint256 bitmapIndex, uint256 bit, IERC20 tokenIn, address tokenOut, uint256 tokenInAmount, uint256 tokenOutAmount,
     uint256 expiryBlock, address recipient, address to, bytes calldata data
   )
-    external nonReentrant
+    external
   {
     if (expiryBlock <= block.number) {
       revert Expired();
@@ -50,7 +49,7 @@ contract ApprovalSwapsV1 is ReentrancyGuard {
 
     IERC20(tokenIn).transferFrom(owner, recipient, tokenInAmount);
 
-    CALL_EXECUTOR.proxyCall(to, data);
+    CALL_EXECUTOR_V2.proxyCall(to, data);
 
     uint256 tokenOutAmountReceived = balanceOf(tokenOut, owner) - tokenOutBalance;
     if (tokenOutAmountReceived < tokenOutAmount) {
@@ -73,7 +72,7 @@ contract ApprovalSwapsV1 is ReentrancyGuard {
     uint256 bitmapIndex, uint256 bit, IERC20 tokenIn, IERC721 nftOut, uint256 tokenInAmount, uint256 expiryBlock, address recipient,
     address to, bytes calldata data
   )
-    external nonReentrant
+    external
   {
     require(expiryBlock > block.number, 'Expired');
   
@@ -84,7 +83,7 @@ contract ApprovalSwapsV1 is ReentrancyGuard {
     uint256 nftOutBalance = nftOut.balanceOf(owner);
 
     tokenIn.transferFrom(owner, recipient, tokenInAmount);
-    CALL_EXECUTOR.proxyCall(to, data);
+    CALL_EXECUTOR_V2.proxyCall(to, data);
 
     uint256 nftOutAmountReceived = nftOut.balanceOf(owner) - nftOutBalance;
     require(nftOutAmountReceived >= 1, 'NotEnoughReceived');
@@ -106,7 +105,7 @@ contract ApprovalSwapsV1 is ReentrancyGuard {
     uint256 bitmapIndex, uint256 bit, IERC721 nftIn, address tokenOut, uint256 nftInId, uint256 tokenOutAmount, uint256 expiryBlock,
     address recipient, address to, bytes calldata data
   )
-    external nonReentrant
+    external
   {
     require(expiryBlock > block.number, 'Expired');
   
@@ -117,7 +116,7 @@ contract ApprovalSwapsV1 is ReentrancyGuard {
     uint256 tokenOutBalance = balanceOf(tokenOut, owner);
 
     nftIn.transferFrom(owner, recipient, nftInId);
-    CALL_EXECUTOR.proxyCall(to, data);
+    CALL_EXECUTOR_V2.proxyCall(to, data);
 
     uint256 tokenOutAmountReceived = balanceOf(tokenOut, owner) - tokenOutBalance;
     require(tokenOutAmountReceived >= tokenOutAmount, 'NotEnoughReceived');
@@ -140,7 +139,7 @@ contract ApprovalSwapsV1 is ReentrancyGuard {
     uint256 bitmapIndex, uint256 bit, IERC20 tokenIn, uint256 tokenInAmount, IERC1155 tokenOut, uint256 tokenOutId, uint256 tokenOutAmount, uint256 expiryBlock, address recipient,
     address to, bytes calldata data
   )
-    external nonReentrant
+    external
   {
     require(expiryBlock > block.number, 'Expired');
   
@@ -151,7 +150,7 @@ contract ApprovalSwapsV1 is ReentrancyGuard {
     uint256 tokenOutBalance = tokenOut.balanceOf(owner, tokenOutId);
 
     tokenIn.transferFrom(owner, recipient, tokenInAmount);
-    CALL_EXECUTOR.proxyCall(to, data);
+    CALL_EXECUTOR_V2.proxyCall(to, data);
 
     uint256 tokenOutAmountReceived = tokenOut.balanceOf(owner, tokenOutId) - tokenOutBalance;
     require(tokenOutAmountReceived >= tokenOutAmount, 'NotEnoughReceived');
@@ -174,7 +173,7 @@ contract ApprovalSwapsV1 is ReentrancyGuard {
     uint256 bitmapIndex, uint256 bit, IERC1155 tokenIn, uint256 tokenInId, uint256 tokenInAmount, address tokenOut, uint256 tokenOutAmount, uint256 expiryBlock,
     address recipient, address to, bytes calldata data
   )
-    external nonReentrant
+    external
   {
     require(expiryBlock > block.number, 'Expired');
   
@@ -185,7 +184,7 @@ contract ApprovalSwapsV1 is ReentrancyGuard {
     uint256 tokenOutBalance = balanceOf(tokenOut, owner);
 
     tokenIn.safeTransferFrom(owner, recipient, tokenInId, tokenInAmount, '');
-    CALL_EXECUTOR.proxyCall(to, data);
+    CALL_EXECUTOR_V2.proxyCall(to, data);
 
     uint256 tokenOutAmountReceived = balanceOf(tokenOut, owner) - tokenOutBalance;
     require(tokenOutAmountReceived >= tokenOutAmount, 'NotEnoughReceived');
@@ -209,7 +208,7 @@ contract ApprovalSwapsV1 is ReentrancyGuard {
     uint256 bitmapIndex, uint256 bit, IERC1155 tokenIn, uint256 tokenInId, uint256 tokenInAmount, IERC1155 tokenOut, uint256 tokenOutId, uint256 tokenOutAmount, uint256 expiryBlock,
     address recipient, address to, bytes calldata data
   )
-    external nonReentrant
+    external
   {
     require(expiryBlock > block.number, 'Expired');
   
@@ -220,7 +219,7 @@ contract ApprovalSwapsV1 is ReentrancyGuard {
     uint256 tokenOutBalance = tokenOut.balanceOf(owner, tokenOutId);
 
     tokenIn.safeTransferFrom(owner, recipient, tokenInId, tokenInAmount, '');
-    CALL_EXECUTOR.proxyCall(to, data);
+    CALL_EXECUTOR_V2.proxyCall(to, data);
 
     uint256 tokenOutAmountReceived = tokenOut.balanceOf(owner, tokenOutId) - tokenOutBalance;
     require(tokenOutAmountReceived >= tokenOutAmount, 'NotEnoughReceived');
