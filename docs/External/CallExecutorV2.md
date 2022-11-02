@@ -18,6 +18,13 @@ but also makes other malicious calls that rely on msg.sender. Forcing all
 unsigned data execution to be done through a CallExecutor ensures that an
 attacker cannot impersonate the users's account.
 
+ReentrancyGuard is implemented here to revert on callbacks to any verifier
+functions that use CallExecutorV2.proxyCall()
+
+CallExecutorV2 is modified from https://github.com/brinktrade/brink-verifiers/blob/985900cb405e4d59e37258416d68f36ac443481f/contracts/External/CallExecutor.sol
+This version adds ReentrancyGuard and removes the data return so that the
+nonReentrant modifier always unlocks the guard at the end of the function
+
 
 
 ### `proxyCall(address to, bytes data)` (external)
