@@ -6,7 +6,8 @@ V2 verifier smart contracts for Brink
 
 | Contract | Address | Networks |
 | --- | --- | --- |
-| ApprovalSwapsV1.sol | 0xe66CDd75A1E3002186EfFDD50b4912A2a5650842 |[mainnet](https://etherscan.io/address/0xe66CDd75A1E3002186EfFDD50b4912A2a5650842#code), [goerli](https://goerli.etherscan.io/address/0xe66CDd75A1E3002186EfFDD50b4912A2a5650842#code)|
+| ApprovalSwapsV1.sol | 0x9A7B09e63FD17a36e5Ab187a5D7B75149fEBFa53 |[mainnet](https://etherscan.io/address/0x9A7B09e63FD17a36e5Ab187a5D7B75149fEBFa53#code), [goerli](https://goerli.etherscan.io/address/0x9A7B09e63FD17a36e5Ab187a5D7B75149fEBFa53#code)|
+| CallExecutorV2.sol | 0x6FE756B9C61CF7e9f11D96740B096e51B64eBf13 |[mainnet](https://etherscan.io/address/0x6FE756B9C61CF7e9f11D96740B096e51B64eBf13#code), [goerli](https://goerli.etherscan.io/address/0x6FE756B9C61CF7e9f11D96740B096e51B64eBf13#code)|
 
 ## Install
 
