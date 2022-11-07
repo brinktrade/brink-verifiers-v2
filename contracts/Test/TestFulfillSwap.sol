@@ -43,6 +43,22 @@ contract TestFulfillSwap is ERC1155Holder {
     }
   }
 
+  function fulfillTokenOutSwapAndCall(IERC20 tokenOut, uint tokenOutAmount, address account, address to, bytes memory data) external payable {
+    tokenOut.transfer(account, tokenOutAmount);
+
+    assembly {
+      let result := call(gas(), to, 0, add(data, 0x20), mload(data), 0, 0)
+      returndatacopy(0, 0, returndatasize())
+      switch result
+      case 0 {
+        revert(0, returndatasize())
+      }
+      default {
+        return(0, returndatasize())
+      }
+    }
+  }
+
   function fulfillERC1155OutSwap(IERC1155 erc1155Out, uint id, uint amount, address account) external payable {
     erc1155Out.safeTransferFrom(address(this), account, id, amount, '');
   }
