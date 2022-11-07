@@ -7,10 +7,11 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@brinkninja/verifiers/contracts/Interfaces/ICallExecutor.sol";
 import "@brinkninja/verifiers/contracts/Libraries/Bit.sol";
+import "../Libraries/ProxyReentrancyGuard.sol";
 
 /// @title Verifier functions for swaps that use token approvals for input asset transfer
 /// @notice These functions should be executed by metaDelegateCall() on Brink account proxy contracts
-contract ApprovalSwapsV1 {
+contract ApprovalSwapsV1 is ProxyReentrancyGuard {
   /// @dev Revert when swap is expired
   error Expired();
 
@@ -35,7 +36,7 @@ contract ApprovalSwapsV1 {
     uint256 bitmapIndex, uint256 bit, IERC20 tokenIn, address tokenOut, uint256 tokenInAmount, uint256 tokenOutAmount,
     uint256 expiryBlock, address recipient, address to, bytes calldata data
   )
-    external
+    external nonReentrant
   {
     if (expiryBlock <= block.number) {
       revert Expired();
@@ -72,7 +73,7 @@ contract ApprovalSwapsV1 {
     uint256 bitmapIndex, uint256 bit, IERC20 tokenIn, IERC721 nftOut, uint256 tokenInAmount, uint256 expiryBlock, address recipient,
     address to, bytes calldata data
   )
-    external
+    external nonReentrant
   {
     require(expiryBlock > block.number, 'Expired');
   
@@ -107,7 +108,7 @@ contract ApprovalSwapsV1 {
     uint256 bitmapIndex, uint256 bit, IERC721 nftIn, address tokenOut, uint256 nftInId, uint256 tokenOutAmount, uint256 expiryBlock,
     address recipient, address to, bytes calldata data
   )
-    external
+    external nonReentrant
   {
     require(expiryBlock > block.number, 'Expired');
   
@@ -143,7 +144,7 @@ contract ApprovalSwapsV1 {
     uint256 bitmapIndex, uint256 bit, IERC20 tokenIn, uint256 tokenInAmount, IERC1155 tokenOut, uint256 tokenOutId, uint256 tokenOutAmount, uint256 expiryBlock, address recipient,
     address to, bytes calldata data
   )
-    external
+    external nonReentrant
   {
     require(expiryBlock > block.number, 'Expired');
   
@@ -179,7 +180,7 @@ contract ApprovalSwapsV1 {
     uint256 bitmapIndex, uint256 bit, IERC1155 tokenIn, uint256 tokenInId, uint256 tokenInAmount, address tokenOut, uint256 tokenOutAmount, uint256 expiryBlock,
     address recipient, address to, bytes calldata data
   )
-    external
+    external nonReentrant
   {
     require(expiryBlock > block.number, 'Expired');
   
@@ -216,7 +217,7 @@ contract ApprovalSwapsV1 {
     uint256 bitmapIndex, uint256 bit, IERC1155 tokenIn, uint256 tokenInId, uint256 tokenInAmount, IERC1155 tokenOut, uint256 tokenOutId, uint256 tokenOutAmount, uint256 expiryBlock,
     address recipient, address to, bytes calldata data
   )
-    external
+    external nonReentrant
   {
     require(expiryBlock > block.number, 'Expired');
   

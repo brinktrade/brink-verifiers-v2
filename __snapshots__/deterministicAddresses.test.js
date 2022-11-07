@@ -1,5 +1,5 @@
 exports['ApprovalSwapsV1.sol deterministic address check 1'] = `
-0x9A7B09e63FD17a36e5Ab187a5D7B75149fEBFa53
+0x6ef84B098A812B8f4C81cD6d0B0A5a64d17C9B3e
 `
 
 exports['CallExecutorV2.sol deterministic address check 1'] = `
